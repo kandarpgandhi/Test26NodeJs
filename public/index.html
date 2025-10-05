@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Booking App</title>
+</head>
+
+<body>
+    <h1>Booking Form</h1>
+    <form id="booking-form">
+        <input type="text" id="name" placeholder="Name" required />
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="text" id="phone" placeholder="Phone Number" required />
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Users</h2>
+    <ul id="user-list"></ul>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        const form = document.getElementById('booking-form')
+        const userList = document.getElementById('user-list')
+
+        async function fetchUsers() {
+            try {
+                const res = await axios.get('/users')
+                const users = res.data
+
+                userList.innerHTML = ''
+                users.forEach(user => {
+                    const li = document.createElement('li')
+                    li.innerHTML = `
+            ${user.name} - ${user.email}
+            <button onclick="deleteUser(${user.id})">Delete</button>
+          `
+                    userList.appendChild(li)
+                })
+            } catch (err) {
+                console.error('Error fetching users:', err)
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault()
+            const name = document.getElementById('name').value
+            const email = document.getElementById('email').value
+            const phone = document.getElementById('phone').value
+
+            try {
+                await axios.post('/users', { name, email, phone })
+                form.reset()
+                fetchUsers()
+            } catch (err) {
+                console.error('Error adding user:', err)
+            }
+        })
+
+        async function deleteUser(id) {
+            try {
+                await axios.delete(`/users/${id}`)
+                fetchUsers()
+            } catch (err) {
+                console.error('Error deleting user:', err)
+            }
+        }
+        fetchUsers()
+    </script>
+</body>
+
+</html>
